@@ -44,19 +44,23 @@ $SPEC{ruler} = {
         major_tick_every => {
             schema => ['int*', min=>1],
             default => 10,
+            cmdline_aliases => {N=>{}},
         },
         major_tick_character => {
             schema => ['str', max_len=>1],
             default => '|',
+            cmdline_aliases => {M=>{}},
         },
 
         minor_tick_every => {
             schema => ['int*', min=>1],
             default => 1,
+            cmdline_aliases => {n=>{}},
         },
         minor_tick_character => {
             schema => ['str', max_len=>1],
             default => '.',
+            cmdline_aliases => {m=>{}},
         },
 
         number_every => {
