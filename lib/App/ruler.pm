@@ -118,7 +118,7 @@ sub ruler {
     }
 
     # clip again
-    $ruler = susbtr($ruler, 0, $len) if length($ruler) > $len;
+    $ruler = substr($ruler, 0, $len) if length($ruler) > $len;
 
     [200, "OK", $ruler];
 }
