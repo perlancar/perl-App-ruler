@@ -35,9 +35,10 @@ $SPEC{ruler} = {
             schema => ['int*', min=>0],
             cmdline_aliases => {l=>{}},
         },
-        background_character => {
-            schema => ['str*', len=>1],
+        background_pattern => {
+            schema => ['str*', min_len=>1],
             default => '-',
+            cmdline_aliases => {bg=>{}},
         },
 
         major_tick_every => {
@@ -45,7 +46,7 @@ $SPEC{ruler} = {
             default => 10,
         },
         major_tick_character => {
-            schema => ['str', len=>1],
+            schema => ['str', max_len=>1],
             default => '|',
         },
 
@@ -54,7 +55,7 @@ $SPEC{ruler} = {
             default => 1,
         },
         minor_tick_character => {
-            schema => ['str', len=>1],
+            schema => ['str', max_len=>1],
             default => '.',
         },
 
@@ -73,22 +74,13 @@ sub ruler {
 
     my $len = $args{length} // $term_width;
 
-    # XXX schema
-    my $bgchar = $args{background_character} // '-';
-    return [400, "Background character is not a single character"]
-        unless length($bgchar) == 1;
-    my $mintickchar = exists($args{minor_tick_character}) ?
-        $args{minor_tick_character} : '.';
-    return [400, "Minor tick character is not a single character"]
-        if defined($mintickchar) && length($mintickchar) != 1;
-    my $majtickchar = exists($args{major_tick_character}) ?
-        $args{major_tick_character} : '|';
-    return [400, "Major tick character is not a single character"]
-        if defined($majtickchar) && length($majtickchar) != 1;
+    my $bgpat = $args{background_pattern} // '-';
+    my $mintickchar = $args{minor_tick_character} // '.';
+    my $majtickchar = $args{major_tick_character} // '|';
 
-    my $ruler = $bgchar x $len;
+    my $ruler = $bgpat x (int($len / length($bgpat)) + 1);
 
-    if (defined $mintickchar) {
+    if (length $mintickchar) {
         my $every = $args{minor_tick_every} // 1;
         for (1..$len) {
             if ($_ % $every == 0) {
@@ -96,7 +88,7 @@ sub ruler {
             }
         }
     }
-    if (defined $majtickchar) {
+    if (length $majtickchar) {
         my $every = $args{major_tick_every} // 10;
         for (1..$len) {
             if ($_ % $every == 0) {
