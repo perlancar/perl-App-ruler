@@ -71,6 +71,11 @@ $SPEC{ruler} = {
             schema => ['int*', min=>0],
             default => 10,
         },
+        number_format => {
+            schema => ['str*'],
+            default => '%d',
+            cmdline_aliases => {f=>{}},
+        },
     },
 };
 sub ruler {
@@ -105,9 +110,10 @@ sub ruler {
     {
         my $numevery = $args{number_every} // 10;
         my $numstart = $args{number_start} // 10;
+        my $fmt = $args{number_format} // '%d';
         for ($numstart..$len) {
             if ($_ % $numevery == 0) {
-                my $num = $_;
+                my $num = sprintf($fmt, $_);
                 substr($ruler, $_, length($num)) = $num;
             }
         }
