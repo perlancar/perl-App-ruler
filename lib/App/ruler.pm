@@ -117,8 +117,10 @@ sub ruler {
         }
     }
 
-    # clip again
-    $ruler = substr($ruler, 0, $len) if length($ruler) > $len;
+    # final clip
+    $ruler = substr($ruler, 0, $len);
+    $ruler .= "\n"
+        unless $len == ($^O =~ /Win32/ ? $term_width-1 : $term_width);
 
     [200, "OK", $ruler];
 }
