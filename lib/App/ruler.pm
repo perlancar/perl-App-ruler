@@ -131,6 +131,13 @@ sub ruler {
 1;
 # ABSTRACT:
 
+=head1 TIPS
+
+To see background pattern, disable minor ticking by using C<< -m '' >>.
+
+To disable numbering, set number format to an empty string: C<< -f '' >>.
+
+
 =head1 SEE ALSO
 
 L<hr> (L<App::hr>)
