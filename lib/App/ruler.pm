@@ -108,6 +108,7 @@ sub ruler {
 
     # draw numbers
     {
+        no warnings; # e.g. when sprintf('', $_)
         my $numevery = $args{number_every} // 10;
         my $numstart = $args{number_start} // 10;
         my $fmt = $args{number_format} // '%d';
