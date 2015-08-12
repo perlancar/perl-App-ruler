@@ -22,6 +22,11 @@ if (eval { require Term::Size; 1 }) {
     $term_width = 80;
 }
 
+sub _colored {
+    require Term::ANSIColor;
+    Term::ANSIColor::colored(@_);
+}
+
 $SPEC{ruler} = {
     v => 1.1,
     summary => 'Print horizontal ruler on the terminal',
@@ -40,6 +45,9 @@ $SPEC{ruler} = {
             default => '-',
             cmdline_aliases => {bg=>{}},
         },
+        background_color => {
+            schema => ['str*'],
+        },
 
         major_tick_every => {
             schema => ['int*', min=>1],
@@ -50,6 +58,9 @@ $SPEC{ruler} = {
             schema => ['str', max_len=>1],
             default => '|',
             cmdline_aliases => {M=>{}},
+        },
+        major_tick_color => {
+            schema => ['str*'],
         },
 
         minor_tick_every => {
@@ -62,9 +73,12 @@ $SPEC{ruler} = {
             default => '.',
             cmdline_aliases => {m=>{}},
         },
+        minor_tick_color => {
+            schema => ['str*'],
+        },
 
         number_every => {
-            schema => ['int*', min=>1],
+            schema => ['int*', min=>0], # 0 means do not draw
             default => 10,
         },
         number_start => {
@@ -76,32 +90,61 @@ $SPEC{ruler} = {
             default => '%d',
             cmdline_aliases => {f=>{}},
         },
+        number_color => {
+            schema => ['str*'],
+        },
     },
 };
 sub ruler {
     my %args = @_;
 
-    my $len = $args{length} // $term_width;
+    my $ruler_len = $args{length} // $term_width;
+    my $use_color;
 
+    # draw background
     my $bgpat = $args{background_pattern} // '-';
+    my $ruler = $bgpat x (int($ruler_len / length($bgpat)) + 1);
+    if ($args{background_color}) {
+        $use_color++;
+        $ruler = _colored($ruler, $args{background_color});
+    }
+
+    # draw minor ticks
     my $mintickchar = $args{minor_tick_character} // '.';
-    my $majtickchar = $args{major_tick_character} // '|';
-
-    my $ruler = $bgpat x (int($len / length($bgpat)) + 1);
-
+    if ($args{minor_tick_color} && length($mintickchar)) {
+        $use_color++;
+        $mintickchar = _colored($mintickchar, $args{minor_tick_color});
+    }
     if (length $mintickchar) {
         my $every = $args{minor_tick_every} // 1;
-        for (1..$len) {
+        for (1..$ruler_len) {
             if ($_ % $every == 0) {
-                substr($ruler, $_-1, 1) = $mintickchar;
+                if ($use_color) {
+                    require Text::ANSI::NonWideUtil;
+                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_-1, 1, $mintickchar);
+                } else {
+                    substr($ruler, $_-1, 1) = $mintickchar;
+                }
             }
         }
     }
+
+    # draw major ticks
+    my $majtickchar = $args{major_tick_character} // '|';
+    if ($args{major_tick_color} && length($majtickchar)) {
+        $use_color++;
+        $majtickchar = _colored($majtickchar, $args{major_tick_color});
+    }
     if (length $majtickchar) {
         my $every = $args{major_tick_every} // 10;
-        for (1..$len) {
+        for (1..$ruler_len) {
             if ($_ % $every == 0) {
-                substr($ruler, $_-1, 1) = $majtickchar;
+                if ($use_color) {
+                    require Text::ANSI::NonWideUtil;
+                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_-1, 1, $majtickchar);
+                } else {
+                    substr($ruler, $_-1, 1) = $majtickchar;
+                }
             }
         }
     }
@@ -110,20 +153,40 @@ sub ruler {
     {
         no warnings; # e.g. when sprintf('', $_)
         my $numevery = $args{number_every} // 10;
+        last unless $numevery > 0;
         my $numstart = $args{number_start} // 10;
         my $fmt = $args{number_format} // '%d';
-        for ($numstart..$len) {
+        $use_color++ if $args{number_color};
+        for ($numstart..$ruler_len) {
             if ($_ % $numevery == 0) {
                 my $num = sprintf($fmt, $_);
-                substr($ruler, $_, length($num)) = $num;
+                my $num_len;
+                if ($args{number_color}) {
+                    $num = _colored($num, $args{number_color});
+                    require Text::ANSI::NonWideUtil;
+                    $num_len = Text::ANSI::NonWideUtil::ta_length($num);
+                } else {
+                    $num_len = length($num);
+                }
+                if ($use_color) {
+                    require Text::ANSI::NonWideUtil;
+                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_, $num_len, $num);
+                } else {
+                    substr($ruler, $_, $num_len) = $num;
+                }
             }
         }
     }
 
     # final clip
-    $ruler = substr($ruler, 0, $len);
+    if ($use_color) {
+        require Text::ANSI::NonWideUtil;
+        $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, 0, $ruler_len);
+    } else {
+        $ruler = substr($ruler, 0, $ruler_len);
+    }
     $ruler .= "\n"
-        unless $len == ($^O =~ /Win32/ ? $term_width-1 : $term_width);
+        unless $ruler_len == ($^O =~ /Win32/ ? $term_width-1 : $term_width);
 
     [200, "OK", $ruler];
 }
@@ -135,7 +198,8 @@ sub ruler {
 
 To see background pattern, disable minor ticking by using C<< -m '' >>.
 
-To disable numbering, set number format to an empty string: C<< -f '' >>.
+To disable numbering, set number format to an empty string: C<< -f '' >> or C<<
+--number-every 0 >>.
 
 
 =head1 SEE ALSO
