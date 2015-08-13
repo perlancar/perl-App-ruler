@@ -1,5 +1,12 @@
 Revision history for App-ruler
 
+0.04    2015-08-13 (PERLANCAR)
+
+	- No functional changes.
+
+	- Add examples.
+
+
 0.03    2015-08-12 (PERLANCAR)
 
 	- Add color support (--background-color, --major-tick-color,
