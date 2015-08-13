@@ -94,6 +94,21 @@ $SPEC{ruler} = {
             schema => ['str*'],
         },
     },
+    examples => [
+        {
+            summary => 'Default ruler (dash + number every 10 characters)',
+            args => {},
+        },
+        {
+            summary => 'White ruler with red marks and numbers',
+            args => {
+                background_color => "black on_white",
+                minor_tick_character => '',
+                major_tick_color => "red on_white",
+                number_color => "bold red on_white",
+            },
+        },
+    ],
 };
 sub ruler {
     my %args = @_;
