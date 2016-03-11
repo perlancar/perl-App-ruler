@@ -135,8 +135,8 @@ sub ruler {
         for (1..$ruler_len) {
             if ($_ % $every == 0) {
                 if ($use_color) {
-                    require Text::ANSI::NonWideUtil;
-                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_-1, 1, $mintickchar);
+                    require Text::ANSI::Util;
+                    $ruler = Text::ANSI::Util::ta_substr($ruler, $_-1, 1, $mintickchar);
                 } else {
                     substr($ruler, $_-1, 1) = $mintickchar;
                 }
@@ -155,8 +155,8 @@ sub ruler {
         for (1..$ruler_len) {
             if ($_ % $every == 0) {
                 if ($use_color) {
-                    require Text::ANSI::NonWideUtil;
-                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_-1, 1, $majtickchar);
+                    require Text::ANSI::Util;
+                    $ruler = Text::ANSI::Util::ta_substr($ruler, $_-1, 1, $majtickchar);
                 } else {
                     substr($ruler, $_-1, 1) = $majtickchar;
                 }
@@ -178,14 +178,14 @@ sub ruler {
                 my $num_len;
                 if ($args{number_color}) {
                     $num = _colored($num, $args{number_color});
-                    require Text::ANSI::NonWideUtil;
-                    $num_len = Text::ANSI::NonWideUtil::ta_length($num);
+                    require Text::ANSI::Util;
+                    $num_len = Text::ANSI::Util::ta_length($num);
                 } else {
                     $num_len = length($num);
                 }
                 if ($use_color) {
-                    require Text::ANSI::NonWideUtil;
-                    $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, $_, $num_len, $num);
+                    require Text::ANSI::Util;
+                    $ruler = Text::ANSI::Util::ta_substr($ruler, $_, $num_len, $num);
                 } else {
                     substr($ruler, $_, $num_len) = $num;
                 }
@@ -195,8 +195,8 @@ sub ruler {
 
     # final clip
     if ($use_color) {
-        require Text::ANSI::NonWideUtil;
-        $ruler = Text::ANSI::NonWideUtil::ta_substr($ruler, 0, $ruler_len);
+        require Text::ANSI::Util;
+        $ruler = Text::ANSI::Util::ta_substr($ruler, 0, $ruler_len);
     } else {
         $ruler = substr($ruler, 0, $ruler_len);
     }
