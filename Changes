@@ -1,3 +1,8 @@
+0.060   2019-07-30  Released-By: PERLANCAR; Urgency: medium
+
+	- [bugfix] Fix the use of Term::Size::chars().
+
+
 0.05    2016-03-11  Released-By: PERLANCAR
 
 	- Adjust to Text::ANSI::Util 0.22 (::NonWideUtil removed).
