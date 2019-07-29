@@ -17,7 +17,7 @@ our %SPEC;
 
 my $term_width;
 if (eval { require Term::Size; 1 }) {
-    ($term_width, undef) = Term::Size::chars();
+    ($term_width, undef) = Term::Size::chars(*STDOUT{IO});
 } else {
     $term_width = 80;
 }
